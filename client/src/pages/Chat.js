@@ -7,7 +7,6 @@ import {
   Avatar, 
   Typography, 
   Space, 
-  Card,
   Empty,
   message
 } from 'antd';
