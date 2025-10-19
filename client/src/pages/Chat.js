@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Layout, 
   List, 
@@ -41,11 +41,26 @@ const Chat = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (selectedRoom) {
-      loadRoomMessages();
+  // ✅ 用 useCallback 包裹，依赖 selectedRoom
+  const loadRoomMessages = useCallback(async () => {
+    if (!selectedRoom) return;
+    try {
+      setLoading(true);
+      const response = await chatAPI.getRoomMessages(selectedRoom.id);
+      if (response.data.success) {
+        setMessages(response.data.data);
+      }
+    } catch (error) {
+      console.error('加载消息失败:', error);
+      message.error('加载消息失败');
+    } finally {
+      setLoading(false);
     }
   }, [selectedRoom]);
+
+  useEffect(() => {
+    loadRoomMessages();
+  }, [loadRoomMessages]); // ✅ ESLint 不会报错
 
   useEffect(() => {
     scrollToBottom();
@@ -64,21 +79,6 @@ const Chat = () => {
     } catch (error) {
       console.error('加载聊天室失败:', error);
       message.error('加载聊天室失败');
-    }
-  };
-
-  const loadRoomMessages = async () => {
-    try {
-      setLoading(true);
-      const response = await chatAPI.getRoomMessages(selectedRoom.id);
-      if (response.data.success) {
-        setMessages(response.data.data);
-      }
-    } catch (error) {
-      console.error('加载消息失败:', error);
-      message.error('加载消息失败');
-    } finally {
-      setLoading(false);
     }
   };
 
